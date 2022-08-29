@@ -2,7 +2,7 @@
 
 # OOP School Library
 
-> Project for decoding morse code message.
+> This project is an OOP school library that adds new students, teachers, and books. It also saves records who of who borrowed a given book and when.
 
 ## Built With
 
