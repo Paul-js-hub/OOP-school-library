@@ -1,7 +1,7 @@
 require_relative 'nameable_interface'
 class Person < Nameable
   attr_reader :id
-  attr_accessor :name, :age
+  attr_accessor :name, :age, nameable
 
   def initialize(name, age = 'Unknown', parent_permission: true)
     @id = Random.rand(1..1000)
