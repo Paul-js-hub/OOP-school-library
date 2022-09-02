@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 class Rental
   attr_reader :book, :person
   attr_accessor :date
