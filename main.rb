@@ -9,6 +9,7 @@ class Main < App
       menu
       option = gets.chomp
       break if option == '7'
+
       get_num option
     end
     puts 'Thank you for using our Library!'
