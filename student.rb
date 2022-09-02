@@ -3,8 +3,8 @@ require_relative 'classroom'
 class Student < Person
   attr_reader :classroom
 
-  def initialize(classroom)
-    super('student', 25)
+  def initialize(classroom, name, age)
+    super(name, age)
     @classroom = classroom
   end
 
