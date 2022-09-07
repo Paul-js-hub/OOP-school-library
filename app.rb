@@ -4,10 +4,12 @@ require_relative 'book'
 require_relative 'student'
 require_relative 'classroom'
 require_relative 'person'
+require_relative 'data_store/books_data'
 
 class App
+  include BooksData
   def initialize
-    @books = []
+    @books = fetch_books
     @people = []
     @rentals = []
   end
@@ -66,7 +68,7 @@ class App
     name = gets.chomp
 
     print 'Has parent permission? [Y/N]: '
-    parent_permission = gets.chomp.downcase
+    parent_permission = gets.chomp.downcase == 'y'
 
     student = Student.new(name, age, parent_permission)
     @people << student
