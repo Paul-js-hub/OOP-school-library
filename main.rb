@@ -1,9 +1,11 @@
 require_relative 'app'
 require_relative 'data_store/books_data'
 require_relative 'data_store/people_data'
+require_relative 'data_store/rentals_data'
 class Main < App
-include BooksData
-include PeopleData
+  include BooksData
+  include PeopleData
+  include PersistRental
   def run
     puts 'Welcome to School Library!'
     loop do
@@ -14,6 +16,7 @@ include PeopleData
       get_num option
     end
     store_books(@books)
+    store_rentals(@rentals)
     store_people(@people)
     puts 'Thank you for using our Library!'
   end

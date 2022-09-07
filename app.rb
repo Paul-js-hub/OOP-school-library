@@ -5,13 +5,17 @@ require_relative 'student'
 require_relative 'classroom'
 require_relative 'person'
 require_relative 'data_store/books_data'
+require_relative 'data_store/people_data'
+require_relative 'data_store/rentals_data'
 
 class App
   include BooksData
+  include PeopleData
+  include PersistRental
   def initialize
     @books = fetch_books
-    @people = []
-    @rentals = []
+    @people = fetch_people
+    @rentals = fetch_rentals
   end
 
   def get_num(option)

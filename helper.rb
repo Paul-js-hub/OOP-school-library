@@ -3,40 +3,40 @@ require_relative 'person'
 
 class Helper
   def initialize
-    @people = [] 
+    @people = []
   end
-    def create_person
-        print 'Do you want to create a student (1) or teacher (2) [Input a number]: '
-        option = gets.chomp
-    
-        case option
-        when '1'
-          create_student
-        when '2'
-          create_teacher
-        else
-          puts 'Invalid input. Kindly type 1 or 2'
-        end
-      end
 
-      def create_student
-        print 'Age: '
-        age = gets.chomp.to_i
-    
-        print 'Name: '
-        name = gets.chomp
-    
-        print 'Has parent permission? [Y/N]: '
-        parent_permission = gets.chomp.downcase
-    
-        student = Student.new(name, age, parent_permission)
-        @people << student
-    
-        puts 'Student created successfully'
-        sleep 0.75
-      end
+  def create_person
+    print 'Do you want to create a student (1) or teacher (2) [Input a number]: '
+    option = gets.chomp
 
-      
+    case option
+    when '1'
+      create_student
+    when '2'
+      create_teacher
+    else
+      puts 'Invalid input. Kindly type 1 or 2'
+    end
+  end
+
+  def create_student
+    print 'Age: '
+    age = gets.chomp.to_i
+
+    print 'Name: '
+    name = gets.chomp
+
+    print 'Has parent permission? [Y/N]: '
+    parent_permission = gets.chomp.downcase
+
+    student = Student.new(name, age, parent_permission)
+    @people << student
+
+    puts 'Student created successfully'
+    sleep 0.75
+  end
+
   def create_teacher
     print 'Age: '
     age = gets.chomp.to_i
