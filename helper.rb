@@ -1,62 +1,78 @@
-require_relative 'student'
-require_relative 'person'
-
 class Helper
-  def initialize
-    @people = []
-  end
-
   def create_person
-    print 'Do you want to create a student (1) or teacher (2) [Input a number]: '
-    option = gets.chomp
-
-    case option
-    when '1'
-      create_student
-    when '2'
-      create_teacher
+    print 'Do you want to create a student (1) or a teacher (2)? [Input the number]: '
+    type = gets.chomp.to_i
+    print 'Age: '
+    age = gets.chomp.to_i
+    print 'Name: '
+    name = gets.chomp
+    case type
+    when 1
+      create_student(name, age)
+    when 2
+      create_teacher(name, age)
     else
-      puts 'Invalid input. Kindly type 1 or 2'
+      puts "You haven't enter a right choice!"
     end
+    puts 'Person created successfully'
   end
 
-  def create_student
-    print 'Age: '
-    age = gets.chomp.to_i
-
-    print 'Name: '
-    name = gets.chomp
-
-    print 'Has parent permission? [Y/N]: '
-    parent_permission = gets.chomp.downcase
-
-    student = Student.new(name, age, parent_permission)
-    @people << student
-
-    puts 'Student created successfully'
-    sleep 0.75
+  def create_student(name, age)
+    type = 'student'
+    print 'Parent permission? [Y/N]: '
+    parent_permission = gets.chomp
+    if %w[y Y].include?(parent_permission)
+      parent_permission = true
+    elsif %w[n N].include?(parent_permission)
+      parent_permission == false
+    end
+    APP.create_person(type, age, name, parent_permission)
   end
 
-  def create_teacher
-    print 'Age: '
-    age = gets.chomp.to_i
-
-    print 'Name: '
-    name = gets.chomp
-
+  def create_teacher(name, age)
+    type = 'teacher'
     print 'Specialization: '
     specialization = gets.chomp
-
-    teacher = Teacher.new(specialization, name, age)
-    @people << teacher
-
-    puts 'Teacher created successfully'
-    sleep 0.75
+    APP.create_person(type, age, name, nil, specialization)
   end
 
-  def list_all_people
-    puts 'There are no people yet! Kindly add a student or teacher.' if @people.empty?
-    @people.map { |person| puts "[#{person.class}] Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
-    sleep 0.75
+  def create_book
+    print 'Title: '
+    title = gets.chomp
+    print 'Author: '
+    author = gets.chomp
+    APP.create_book(title, author)
+    puts 'Book created successfully'
+  end
+
+  def create_rental
+    puts 'Select a book from the following list by number'
+    APP.display_books
+    book = gets.chomp.to_i
+    puts 'Select a person from the following list by number(not id)'
+    APP.display_people
+    person = gets.chomp.to_i
+    print 'Date: '
+    date = gets.chomp
+
+    book = APP.books[book]
+    person = APP.persons[person]
+
+    APP.create_rental(date, person, book)
+    puts 'Rental created successfully'
+  end
+
+  def display_rentals
+    puts 'Id of person: '
+    id = gets.chomp.to_i
+
+    our_person = APP.persons.select { |person| person.id == id }.first
+    rentals = our_person.rentals
+
+    if rentals.nil?
+      puts 'There is no rentals with this ID'
+    else
+      APP.display_rentals(rentals)
+    end
   end
 end

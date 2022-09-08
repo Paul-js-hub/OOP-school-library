@@ -1,149 +1,190 @@
-require_relative 'rental'
-require_relative 'teacher'
 require_relative 'book'
 require_relative 'student'
-require_relative 'classroom'
-require_relative 'person'
-require_relative 'data_store/books_data'
-require_relative 'data_store/people_data'
-require_relative 'data_store/rentals_data'
-
+require_relative 'teacher'
+require_relative 'rental'
+require_relative './persist_files/persist_books'
+require_relative './persist_files/persist_people'
+require_relative './persist_files/persist_rentals'
+# rubocop:disable Metrics/ClassLength
 class App
-  include BooksData
-  include PeopleData
-  include PersistRental
   def initialize
     @books = fetch_books
     @people = fetch_people
     @rentals = fetch_rentals
   end
 
-  def get_num(option)
-    case option
-    when '1'
-      list_all_books
-    when '2'
-      list_all_people
-    when '3'
+  include BooksPersistence
+  include PeoplePersistence
+  include RentalsPersistence
+
+  def menu
+    puts 'Welcome to OOP SCHOOL LIBRARY SYSTEM!'
+    puts '1 - List all books'
+    puts '2 - List all people'
+    puts '3 - Create a person'
+    puts '4 - Create a book'
+    puts '5 - Create a rental'
+    puts '6 - List all rentals for a given person id'
+    puts '7 - Exit'
+  end
+
+  def check(options)
+    case options
+    when 1
+      list_books
+    when 2
+      list_people
+    when 3
       create_person
-    when '4'
+    when 4
       create_book
-    when '5'
+    when 5
       create_rental
-    when '6'
-      list_rentals_by_person_id
-    else
-      puts 'Please enter a number between 1 and 7'
+    when 6
+      list_rentals
     end
   end
 
-  def list_all_books
-    puts 'There are no books yet! Kindly add books.' if @books.empty?
-
-    @books.each { |book| puts "Title: #{book.title}, Author: #{book.author}" }
-    sleep 0.75
+  def execute
+    choice = 0
+    while choice != 7
+      menu
+      puts
+      puts
+      print '[Enter 1-7]: '
+      choice = gets.chomp.strip.to_i
+      check(choice)
+      puts
+      puts
+    end
+    store_books(@books)
+    store_people(@people)
+    store_rentals(@rentals)
   end
 
-  def list_all_people
-    puts 'There are no people yet! Kindly add a student or teacher.' if @people.empty?
-    @people.map { |person| puts "[#{person.class}] Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
-    sleep 0.75
+  def create_book
+    puts
+    print 'Title: '
+    title = gets.chomp.strip.capitalize
+    print 'Author: '
+    author = gets.chomp.strip.capitalize
+    @books.push(Book.new(title, author))
+  end
+
+  def list_books
+    puts
+    @books.each_with_index do |book, index|
+      puts "#{index}) Title: \"#{book.title}\", Author: #{book.author}"
+    end
   end
 
   def create_person
-    print 'Do you want to create a student (1) or teacher (2) [Input a number]: '
-    option = gets.chomp
-
-    case option
-    when '1'
+    puts
+    print 'Do you want to create a student (1) or a teacher (2)? [Input the number]: '
+    choice = gets.chomp.strip.to_i
+    case choice
+    when 1
       create_student
-    when '2'
+    when 2
       create_teacher
-    else
-      puts 'Invalid input. Kindly type 1 or 2'
     end
   end
 
   def create_student
+    puts
     print 'Age: '
-    age = gets.chomp.to_i
-
+    age = gets.chomp.strip.to_i
+    while age <= 0 || age >= 100
+      print 'Please input a valid age: (1 - 100): '
+      age = gets.chomp.strip.to_i
+    end
     print 'Name: '
-    name = gets.chomp
-
+    name = gets.chomp.strip.capitalize
     print 'Has parent permission? [Y/N]: '
-    parent_permission = gets.chomp.downcase == 'y'
-
-    student = Student.new(name, age, parent_permission)
-    @people << student
-
-    puts 'Student created successfully'
-    sleep 0.75
+    permission = gets.chomp.strip.upcase
+    case permission
+    when 'Y'
+      permission = true
+    when 'N'
+      permission = false
+    end
+    @people << Student.new(Random.rand(1..1000), age, nil, name, parent_permission: permission)
+    puts 'Person created successfully'
   end
 
   def create_teacher
+    puts
     print 'Age: '
-    age = gets.chomp.to_i
-
+    age = gets.chomp.strip.to_i
+    while age <= 0 || age >= 100
+      print 'Please input a valid age (1 - 100): '
+      age = gets.chomp.strip.to_i
+    end
     print 'Name: '
-    name = gets.chomp
-
+    name = gets.chomp.strip.capitalize
     print 'Specialization: '
-    specialization = gets.chomp
-
-    teacher = Teacher.new(specialization, name, age)
-    @people << teacher
-
-    puts 'Teacher created successfully'
-    sleep 0.75
-  end
-
-  def create_book
-    puts 'Title:'
-    title = gets.chomp
-
-    puts 'Author:'
-    author = gets.chomp
-
-    book = Book.new(title, author)
-    @books << book
-
-    puts 'Book created successfully'
-    sleep 0.75
+    specialization = gets.chomp.strip
+    @people << Teacher.new(Random.rand(1..1000), age, specialization, name)
+    puts 'Person created successfully'
   end
 
   def create_rental
+    puts
     puts 'Select a book from the following list by number'
-
-    @books.each_with_index { |book, index| puts "#{index}) Title: #{book.title}, Author: #{book.author}" }
-
-    book_number = gets.chomp.to_i
-    puts 'Select a person from the following list by number (not id)'
-    @people.each_with_index do |person, index|
-      puts "#{index}) [#{person.class}] Name: #{person.name}, ID: #{person.id}, Age: #{person.age}"
+    list_books
+    book_choice = gets.chomp.to_i
+    while book_choice.negative? || book_choice >= @books.length
+      print "Please enter a number within 0 - #{@books.length - 1} range: "
+      book_choice = gets.chomp.to_i
     end
-
-    person_number = gets.chomp.to_i
-
-    print 'Date: '
-    date = gets.chomp.to_s
-
-    rental = Rental.new(date, @people[person_number], @books[book_number])
-    @rentals << rental
-
-    puts 'Rental created successfully'
-    sleep 0.75
+    # book = @books[book_choice]
+    book = "#{@books[book_choice].title} By #{@books[book_choice].author}"
+    puts 'Select a person from the following list by number (not id)'
+    list_people
+    person_choice = gets.chomp.to_i
+    while person_choice.negative? || person_choice >= @people.length
+      print "Please enter a number within 0 - #{@people.length - 1} range: "
+      person_choice = gets.chomp.to_i
+    end
+    person = @people[person_choice].id
+    print 'Enter date of booking: (yyyy/mm/dd) : '
+    date = gets.chomp.strip
+    # person.add_rentals(date, book)
+    @rentals << Rental.new(date, book, person)
   end
 
-  def list_rentals_by_person_id
-    print 'ID of person: '
-    id = gets.chomp.to_i
-
-    puts 'Rentals: '
-
-    @rentals.each do |rental|
-      puts "Date: #{rental.date}, Book '#{rental.book.title}' by #{rental.book.author}" if rental.person.id == id
+  def list_people
+    puts
+    @people.each_with_index do |person, index|
+      puts "#{index}) [#{person.class}] Name: #{person.name}, ID: #{person.id} Age: #{person.age}"
     end
-    sleep 0.75
+  end
+
+  def list_rentals
+    puts
+    list_people
+    print 'ID of person: '
+    person_id = gets.chomp.to_i
+    # person = get_person(person_id)
+
+    selected_person = @rentals.select { |rental| rental.person == person_id }
+    puts 'Rentals:'
+
+    # person.rentals.each do |rental|
+    #   puts "Date: #{rental.date} Book: #{rental.book.title} by #{rental.book.author}"
+    if selected_person.empty?
+      puts "No rentals are found for (#{person_id})"
+    else
+      selected_person.each do |rental|
+        puts "Date: #{rental.date} | Book: #{rental.book}"
+      end
+    end
+  end
+
+  def get_person(id)
+    @people.each do |person|
+      return person if person.id == id
+    end
   end
 end
+# rubocop:enable Metrics/ClassLength
